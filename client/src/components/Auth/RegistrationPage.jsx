@@ -1,83 +1,150 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import auth from "../../helpers/Auth.jsx";
+import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const RegistrationPage = () => {
-    const [form, setForm] = useState({
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-    });
-    const [error, setError] = useState('');
-    const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-        setError('');
-    };
+  const handleChange = (e) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const { username, email, password, confirmPassword } = form;
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const { username, email, password, confirmPassword } = formData;
 
-        if (!username || !email || !password || !confirmPassword) {
-            setError('All fields are required.');
-            return;
-        }
+    if (!username || !email || !password || !confirmPassword) {
+      toast.error('Please fill in all fields');
+      return;
+    }
 
-        if (password !== confirmPassword) {
-            setError('Passwords do not match.');
-            return;
-        }
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
 
-        const user = { username, email, password };
+    localStorage.setItem('user', JSON.stringify({ username, email, password }));
+    toast.success('Registration successful!');
+    setTimeout(() => navigate('/login'), 1000);
+  };
+ return (
+    <div style={styles.container}>
+      <form style={styles.form} onSubmit={handleSubmit}>
+        <h2>Register</h2>
+        <input
+          style={styles.input}
+          name="username"
+          placeholder="Username"
+          onChange={handleChange}
+          required
+        />
+        <input
+          style={styles.input}
+          name="email"
+          type="email"
+          placeholder="Email"
+          onChange={handleChange}
+          required
+        />
 
-        auth.post('/api/users/signup', user).then((res) => {
-            console.log(res);
-            alert('Registration successful!');
-            navigate('/login');
-        }).catch((err) => {
-            console.log(err);
-        })
-
-    };
-
-    return (
-        <div style={styles.page}>
-            <div style={styles.container}>
-                <h2 style={styles.heading}>Register</h2>
-                <form onSubmit={handleSubmit}>
-                    {error && <p style={styles.error}>{error}</p>}
-
-                    <label>Username</label>
-                    <input style={styles.input} type="text" name="username" value={form.username} onChange={handleChange} />
-
-                    <label>Email</label>
-                    <input style={styles.input} type="email" name="email" value={form.email} onChange={handleChange} />
-
-                    <label>Password</label>
-                    <input style={styles.input} type="password" name="password" value={form.password} onChange={handleChange} />
-
-                    <label>Confirm Password</label>
-                    <input style={styles.input} type="password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} />
-
-                    <button type="submit" style={styles.button}>Register</button>
-                </form>
-                <p style={styles.link}>Already have an account? <Link to="/login">Login</Link></p>
-            </div>
+        <div style={styles.passwordContainer}>
+          <input
+            style={styles.passwordInput}
+            name="password"
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Password"
+            onChange={handleChange}
+            required
+          />
+          <span style={styles.eye} onClick={() => setShowPassword(!showPassword)}>
+            {showPassword ? '🙈' : '👁'}
+          </span>
         </div>
-    );
+
+        <div style={styles.passwordContainer}>
+          <input
+            style={styles.passwordInput}
+            name="confirmPassword"
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Confirm Password"
+            onChange={handleChange}
+            required
+          />
+          <span style={styles.eye} onClick={() => setShowPassword(!showPassword)}>
+            {showPassword ? '🙈' : '👁'}
+          </span>
+        </div>
+
+        <button type="submit" style={styles.button}>Register</button>
+        <p>Already have an account? <Link to="/login">Login</Link></p>
+      </form>
+    </div>
+  );
+  
 };
+
+
 
 const styles = {
-    page: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f5f5f5' },
-    container: { width: '100%', maxWidth: '400px', padding: '20px', background: '#fff', borderRadius: '8px', boxShadow: '0 0 10px rgba(0,0,0,0.1)' },
-    heading: { textAlign: 'center' },
-    input: { width: '100%', padding: '10px', marginBottom: '15px', borderRadius: '4px', border: '1px solid #ccc' },
-    button: { width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '4px' },
-    error: { color: 'red', marginBottom: '10px' },
-    link: { textAlign: 'center', marginTop: '10px' }
+  container: {
+    height: '100vh',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  form: {
+    padding: '30px',
+    backgroundColor: 'white',
+    borderRadius: '10px',
+    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+    width: '300px',
+    boxSizing: 'border-box',
+  },
+  input: {
+    width: '100%',
+    padding: '10px',
+    margin: '10px 0',
+    boxSizing: 'border-box',
+  },
+  passwordContainer: {
+    position: 'relative',
+    width: '100%',
+    margin: '10px 0',
+  },
+  passwordInput: {
+    width: '100%',
+    padding: '10px',
+    paddingRight: '40px',
+    boxSizing: 'border-box',
+  },
+  eye: {
+    position: 'absolute',
+    top: '50%',
+    right: '10px',
+    transform: 'translateY(-50%)',
+    cursor: 'pointer',
+    fontSize: '18px',
+  },
+  button: {
+    width: '100%',
+    padding: '10px',
+    backgroundColor: '#007bff',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+  },
 };
-
 export default RegistrationPage;
+
+
+  
+
