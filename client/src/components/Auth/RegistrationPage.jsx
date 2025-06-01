@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import auth from "../../helpers/Auth.jsx";
 
 const RegistrationPage = () => {
     const [form, setForm] = useState({
@@ -31,10 +32,15 @@ const RegistrationPage = () => {
         }
 
         const user = { username, email, password };
-        localStorage.setItem('user', JSON.stringify(user));
 
-        alert('Registration successful!');
-        navigate('/login');
+        auth.post('/api/users/signup', user).then((res) => {
+            console.log(res);
+            alert('Registration successful!');
+            navigate('/login');
+        }).catch((err) => {
+            console.log(err);
+        })
+
     };
 
     return (
