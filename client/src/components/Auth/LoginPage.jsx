@@ -11,23 +11,17 @@ const LoginPage = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    const storedUser = JSON.parse(localStorage.getItem('user'));
-
-    if (!email || !password) {
-      toast.error('Please enter both email and password');
-      return;
-    }
-
-    if (
-      storedUser &&
-      storedUser.email === email &&
-      storedUser.password === password
-    ) {
-      toast.success('Login successful!');
-      setTimeout(() => navigate('/doce'), 1000);
-    } else {
-      toast.error('Invalid email or password');
-    }
+    Auth.post("/api/users/login", form)
+      .then((res) => {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("username", res.data.username);
+        console.log(res);
+        alert("Login successful!");
+        navigate("/docs");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
 return (
