@@ -5,7 +5,7 @@ exports.createDocument = async (req, res) => {
   try {
     const { title = "Untitled Document", content = "" } = req.body;
 
-    const doc = new Document({ title, content });
+    const doc = new Document({ title, content, collaborators: [req.user._id] });
     await doc.save();
 
     res.status(201).json(doc);
