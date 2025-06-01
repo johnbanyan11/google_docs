@@ -1,60 +1,101 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Auth from "../../helpers/Auth";
 
 const LoginPage = () => {
-    const [form, setForm] = useState({ email: '', password: '' });
-    const [error, setError] = useState('');
-    const navigate = useNavigate();
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-        setError('');
-    };
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setError("");
+  };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const storedUser = JSON.parse(localStorage.getItem('user'));
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    Auth.post("/api/users/login", form)
+      .then((res) => {
+        console.log(res);
+        alert("Login successful!");
+        navigate("/docs");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
-        if (!storedUser || form.email !== storedUser.email || form.password !== storedUser.password) {
-            setError('Invalid credentials');
-            return;
-        }
+  return (
+    <div style={styles.page}>
+      <div style={styles.container}>
+        <h2 style={styles.heading}>Login</h2>
+        <form onSubmit={handleSubmit}>
+          {error && <p style={styles.error}>{error}</p>}
 
-        alert('Login successful!');
-        navigate('/doce');
-    };
+          <label>Email</label>
+          <input
+            style={styles.input}
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+          />
 
-    return (
-        <div style={styles.page}>
-            <div style={styles.container}>
-                <h2 style={styles.heading}>Login</h2>
-                <form onSubmit={handleSubmit}>
-                    {error && <p style={styles.error}>{error}</p>}
+          <label>Password</label>
+          <input
+            style={styles.input}
+            type="password"
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+          />
 
-                    <label>Email</label>
-                    <input style={styles.input} type="email" name="email" value={form.email} onChange={handleChange} />
-
-                    <label>Password</label>
-                    <input style={styles.input} type="password" name="password" value={form.password} onChange={handleChange} />
-
-                    <button type="submit" style={styles.button}>Login</button>
-                </form>
-                <p style={styles.link}>Don't have an account? <Link to="/register">Register</Link></p>
-            </div>
-        </div>
-    );
+          <button type="submit" style={styles.button}>
+            Login
+          </button>
+        </form>
+        <p style={styles.link}>
+          Don't have an account? <Link to="/register">Register</Link>
+        </p>
+      </div>
+    </div>
+  );
 };
 
 const styles = {
-    page: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f5f5f5' },
-    container: { width: '100%', maxWidth: '400px', padding: '20px', background: '#fff', borderRadius: '8px', boxShadow: '0 0 10px rgba(0,0,0,0.1)' },
-    heading: { textAlign: 'center' },
-    input: { width: '100%', padding: '10px', marginBottom: '15px', borderRadius: '4px', border: '1px solid #ccc' },
-    button: { width: '100%', padding: '10px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '4px' },
-    error: { color: 'red', marginBottom: '10px' },
-    link: { textAlign: 'center', marginTop: '10px' }
+  page: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100vh",
+    background: "#f5f5f5",
+  },
+  container: {
+    width: "100%",
+    maxWidth: "400px",
+    padding: "20px",
+    background: "#fff",
+    borderRadius: "8px",
+    boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+  },
+  heading: { textAlign: "center" },
+  input: {
+    width: "100%",
+    padding: "10px",
+    marginBottom: "15px",
+    borderRadius: "4px",
+    border: "1px solid #ccc",
+  },
+  button: {
+    width: "100%",
+    padding: "10px",
+    backgroundColor: "#007bff",
+    color: "#fff",
+    border: "none",
+    borderRadius: "4px",
+  },
+  error: { color: "red", marginBottom: "10px" },
+  link: { textAlign: "center", marginTop: "10px" },
 };
-
-
 
 export default LoginPage;
