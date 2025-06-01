@@ -16,6 +16,8 @@ const LoginPage = () => {
     e.preventDefault();
     Auth.post("/api/users/login", form)
       .then((res) => {
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("username", res.data.username);
         console.log(res);
         alert("Login successful!");
         navigate("/docs");
