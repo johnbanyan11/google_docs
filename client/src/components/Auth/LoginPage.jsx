@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import Auth from "../../helpers/Auth";
 import { toast } from 'react-toastify';
 
 const LoginPage = () => {
