@@ -1,114 +1,111 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Auth from "../../helpers/Auth";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setError("");
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!form.email || !form.password) {
+      toast.error("Please enter both email and password");
+      return;
+    }
+
     Auth.post("/api/users/login", form)
       .then((res) => {
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("username", res.data.username);
         console.log(res);
-        alert("Login successful!");
+        toast.success("Login successful!");
         navigate("/docs");
       })
       .catch((err) => {
         console.log(err);
+        toast.error(err.response.data.message);
       });
   };
 
-return (
-    <div style={styles.container}>
-      <form style={styles.form} onSubmit={handleLogin}>
-        <h2>Login</h2>
-        <input
-          style={styles.input}
-          type="email"
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <div style={styles.passwordContainer}>
+  return (
+    <div style={styles.page}>
+      <div style={styles.container}>
+        <h2 style={styles.heading}>Login</h2>
+        <form onSubmit={handleSubmit}>
+          {error && <p style={styles.error}>{error}</p>}
+
+          <label>Email</label>
           <input
-            style={styles.passwordInput}
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Password"
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            style={styles.input}
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
           />
-          <span style={styles.eye} onClick={() => setShowPassword(!showPassword)}>
-            {showPassword ? '🙈' : '👁'}
-          </span>
-        </div>
-        <button type="submit" style={styles.button}>Login</button>
-        <p>Don't have an account? <Link to="/register">Register</Link></p>
-      </form>
+
+          <label>Password</label>
+          <input
+            style={styles.input}
+            type="password"
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+          />
+
+          <button type="submit" style={styles.button}>
+            Login
+          </button>
+        </form>
+        <p style={styles.link}>
+          Don't have an account? <Link to="/register">Register</Link>
+        </p>
+      </div>
     </div>
   );
 };
 
 const styles = {
+  page: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100vh",
+    background: "#f5f5f5",
+  },
   container: {
-    height: '100vh',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    width: "100%",
+    maxWidth: "400px",
+    padding: "20px",
+    background: "#fff",
+    borderRadius: "8px",
+    boxShadow: "0 0 10px rgba(0,0,0,0.1)",
   },
-  form: {
-    padding: '30px',
-    backgroundColor: 'white',
-    borderRadius: '10px',
-    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-    width: '300px',
-    boxSizing: 'border-box',
-  },
+  heading: { textAlign: "center" },
   input: {
-    width: '100%',
-    padding: '10px',
-    margin: '10px 0',
-    boxSizing: 'border-box',
-  },
-  passwordContainer: {
-    position: 'relative',
-    width: '100%',
-    margin: '10px 0',
-  },
-  passwordInput: {
-    width: '100%',
-    padding: '10px',
-    paddingRight: '40px',
-    boxSizing: 'border-box',
-  },
-  eye: {
-    position: 'absolute',
-    top: '50%',
-    right: '10px',
-    transform: 'translateY(-50%)',
-    cursor: 'pointer',
-    fontSize: '18px',
+    width: "100%",
+    padding: "10px",
+    marginBottom: "15px",
+    borderRadius: "4px",
+    border: "1px solid #ccc",
   },
   button: {
-    width: '100%',
-    padding: '10px',
-    backgroundColor: '#007bff',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
+    width: "100%",
+    padding: "10px",
+    backgroundColor: "#007bff",
+    color: "#fff",
+    border: "none",
+    borderRadius: "4px",
   },
+  error: { color: "red", marginBottom: "10px" },
+  link: { textAlign: "center", marginTop: "10px" },
 };
 
 export default LoginPage;
-  
-
-
-
-  

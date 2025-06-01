@@ -1,150 +1,141 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import auth from "../../helpers/Auth.jsx";
+import { toast } from "react-toastify";
 
 const RegistrationPage = () => {
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
-  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setError("");
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const { username, email, password, confirmPassword } = formData;
+    const { username, email, password, confirmPassword } = form;
 
     if (!username || !email || !password || !confirmPassword) {
-      toast.error('Please fill in all fields');
+      setError("All fields are required.");
       return;
     }
 
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
+      setError("Passwords do not match.");
       return;
     }
 
-    localStorage.setItem('user', JSON.stringify({ username, email, password }));
-    toast.success('Registration successful!');
-    setTimeout(() => navigate('/login'), 1000);
+    const user = { username, email, password };
+
+    auth
+      .post("/api/users/signup", user)
+      .then((res) => {
+        console.log(res);
+        toast.success("Registration successful!");
+        navigate("/login");
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error(err.response.data.message);
+      });
   };
- return (
-    <div style={styles.container}>
-      <form style={styles.form} onSubmit={handleSubmit}>
-        <h2>Register</h2>
-        <input
-          style={styles.input}
-          name="username"
-          placeholder="Username"
-          onChange={handleChange}
-          required
-        />
-        <input
-          style={styles.input}
-          name="email"
-          type="email"
-          placeholder="Email"
-          onChange={handleChange}
-          required
-        />
 
-        <div style={styles.passwordContainer}>
+  return (
+    <div style={styles.page}>
+      <div style={styles.container}>
+        <h2 style={styles.heading}>Register</h2>
+        <form onSubmit={handleSubmit}>
+          {error && <p style={styles.error}>{error}</p>}
+
+          <label>Username</label>
           <input
-            style={styles.passwordInput}
+            style={styles.input}
+            type="text"
+            name="username"
+            value={form.username}
+            onChange={handleChange}
+          />
+
+          <label>Email</label>
+          <input
+            style={styles.input}
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+          />
+
+          <label>Password</label>
+          <input
+            style={styles.input}
+            type="password"
             name="password"
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Password"
+            value={form.password}
             onChange={handleChange}
-            required
           />
-          <span style={styles.eye} onClick={() => setShowPassword(!showPassword)}>
-            {showPassword ? '🙈' : '👁'}
-          </span>
-        </div>
 
-        <div style={styles.passwordContainer}>
+          <label>Confirm Password</label>
           <input
-            style={styles.passwordInput}
+            style={styles.input}
+            type="password"
             name="confirmPassword"
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Confirm Password"
+            value={form.confirmPassword}
             onChange={handleChange}
-            required
           />
-          <span style={styles.eye} onClick={() => setShowPassword(!showPassword)}>
-            {showPassword ? '🙈' : '👁'}
-          </span>
-        </div>
 
-        <button type="submit" style={styles.button}>Register</button>
-        <p>Already have an account? <Link to="/login">Login</Link></p>
-      </form>
+          <button type="submit" style={styles.button}>
+            Register
+          </button>
+        </form>
+        <p style={styles.link}>
+          Already have an account? <Link to="/login">Login</Link>
+        </p>
+      </div>
     </div>
   );
-  
 };
-
-
 
 const styles = {
+  page: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100vh",
+    background: "#f5f5f5",
+  },
   container: {
-    height: '100vh',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    width: "100%",
+    maxWidth: "400px",
+    padding: "20px",
+    background: "#fff",
+    borderRadius: "8px",
+    boxShadow: "0 0 10px rgba(0,0,0,0.1)",
   },
-  form: {
-    padding: '30px',
-    backgroundColor: 'white',
-    borderRadius: '10px',
-    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-    width: '300px',
-    boxSizing: 'border-box',
-  },
+  heading: { textAlign: "center" },
   input: {
-    width: '100%',
-    padding: '10px',
-    margin: '10px 0',
-    boxSizing: 'border-box',
-  },
-  passwordContainer: {
-    position: 'relative',
-    width: '100%',
-    margin: '10px 0',
-  },
-  passwordInput: {
-    width: '100%',
-    padding: '10px',
-    paddingRight: '40px',
-    boxSizing: 'border-box',
-  },
-  eye: {
-    position: 'absolute',
-    top: '50%',
-    right: '10px',
-    transform: 'translateY(-50%)',
-    cursor: 'pointer',
-    fontSize: '18px',
+    width: "100%",
+    padding: "10px",
+    marginBottom: "15px",
+    borderRadius: "4px",
+    border: "1px solid #ccc",
   },
   button: {
-    width: '100%',
-    padding: '10px',
-    backgroundColor: '#007bff',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
+    width: "100%",
+    padding: "10px",
+    backgroundColor: "#007bff",
+    color: "#fff",
+    border: "none",
+    borderRadius: "4px",
   },
+  error: { color: "red", marginBottom: "10px" },
+  link: { textAlign: "center", marginTop: "10px" },
 };
+
 export default RegistrationPage;
-
-
-  
-
